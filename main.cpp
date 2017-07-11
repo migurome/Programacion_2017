@@ -1,91 +1,6 @@
-/*
-
-
-Versión 2 del programa.- Ahora tienes que ampliar la funcionalidad del
-programa de manera que permita elegir entre las opciones que figuran a
-continuación y finalizar sólo cuando el usuario decida salir:
-1 – Calcular el día de la semana para una fecha dada
-2 – Obtener la fecha correspondiente al primer domingo de
-un año
-3 – Obtener los domingos de un año
-4 – Obtener los posibles puentes de un año
-0 - Salir
-La opción 1 se corresponde con la versión 1 del programa.
-La opción 2 debe solicitar un año por teclado (que deber ser igual o posterior a
-1900) y calcular la fecha correspondiente al primer domingo de ese año. Por
-ejemplo, para el año 2017, el programa deberá mostrar por pantalla:
-Práctica 1
-El primer domingo del año 2017 es el día: 1 de enero
-
-La opción 3 debe presentar por pantalla el día y el mes de todos los domingos
-de un año que el usuario introduce por teclado (igual o posterior a 1900). Por
-ejemplo, para el año 2017 el programa debe mostrar por pantalla
-Domingos de 2017
-1 de enero
-8 de enero
-15 de enero
-...
-19 de marzo
-26 de marzo
-...
-5 de noviembre
-12 de noviembre
-...
-24 de diciembre
-31 de diciembre
-Número total de domingos: 53
-La opción 4 debe leer del archivo fiestas.txt los días festivos de un cierto
-año (igual o posterior a 1900) que no caen en domingo y localizar cuáles de
-estos días festivos dan lugar a "puentes". Se considera que un día festivo da
-lugar a un puente cuando cae en martes o en jueves. Los días festivos del
-archivo fiestas.txt que dan lugar a puente hay que escribirlos en el archivo
-puentes.txt.
-El archivo fiestas.txt tiene una primera línea en la que figura el año y una
-línea por cada fecha que corresponde a un día festivo donde figuran dos
-números separados por blancos (el primero es el día y el segundo el mes). El
-archivo finaliza con un centinela que son dos 0 separados por blancos.
-El archivo puentes.txt deberá contener una primera línea donde figure el
-año y una línea por cada día de fiestas.txt que da lugar a puente en la que
-aparezcan, en primer lugar la fecha en el mismo formato que se ha establecido
-para fiestas.txt y en segundo lugar, separado por un blanco, el día de la
-semana en que cae (martes o jueves). Finaliza con un centinela que son dos 0
-separados por blancos y XXX como nombre del día.
-
-
-Tu solución debe incluir la implementación de, al menos, los siguientes
-subprogramas:
-
-int menu(): muestra por pantalla un menú con las distintas opciones y
-solicita, valida y devuelve la opción elegida.
-
-
-
-
-
-
-bool puentes(): localiza los posibles puentes asociados a las fiestas de
-un año, guardadas en el archivo fiestas.txt, y guarda en el archivo
-puentes.txt aquellas fiestas que dan lugar a puente de acuerdo con el
-criterio y formato indicado anteriormente en el enunciado de la práctica.
-Versión 3 del programa (opcional ; cuenta en el apartado de “actividad
-adicional” del método de evaluación).- Finalmente, de manera opcional,
-puedes añadir una opción más en el menú:
-
-5 – Obtener los posibles puentes de un año “mejorado”
-Esta opción hace esencialmente lo mismo que la opción 4 pero debe mejorar el
-criterio de detección de posibles puentes. La opción 4 detecta un posible puente
-cuando la fiesta X cae en martes o en jueves pero no tiene en cuenta que el
-lunes inmediatamente anterior o el viernes inmediatamente posterior,
-respectivamente, podrían ser también fiesta y por tanto la fiesta X no generaría
-puente. Un ejemplo habitual en la Comunidad de Madrid es la fiesta de jueves
-santo, que no genera puente porque el viernes santo también es fiesta.
-
-Entrega de la práctica
-
-*/
-
 #include <iostream>
 #include <string>
+#include <fstream>
 using namespace std;
 
 int solicitaAnyo();
@@ -107,19 +22,9 @@ int diaDeLaSemanaEntero(int dia, int mes, int anyo);
 int primerDomingoMes(int mes, int anyo);
 int contadorDomingosMes(int mes, int anyo);
 int domingosAnyo(int anyo);
+bool puentes(int anyo);
 
 int main(){
- 	
- 	int dia = 11, mes = 1, anyo = 2017;
-
- 	//anyo = solicitaAnyo();
- 	//mes = solicitaMes();
- 	//dia = solicitaDia(mes, anyo);
-
- 	for(int i = 1900; i < anyo; i++)
- 		cout << "Anio: " << i << " " << domingosAnyo(i) << endl;
-
-
 
  	return 0;
 }
@@ -367,4 +272,44 @@ int domingosAnyo(int anyo){
 		domingos += contadorDomingosMes(i, anyo);
 
 	return domingos;
+}
+
+bool puentes(int anyo){
+
+	ifstream entrada;
+	ofstream salida;
+	int texto, dia, mes;
+	bool next_it = true;
+
+	entrada.open("fiestas.txt");
+	salida.open("puentes.txt");
+
+	// Nos posicionamos en el anio correcto
+	while(next_it){
+		entrada >> texto;
+		if(texto == anyo)
+			next_it = false;
+	}
+
+	next_it = true;
+
+	// Escribo el año del puente porque si
+	salida << anyo << endl;
+
+	do{
+		entrada >> dia >> mes;
+		// No estamos ante una linea que no sea dia - mes
+		if((dia <= 31 && mes <= 12) && (dia != 0 && mes != 0)){
+			if(diaDeLaSemanaEntero(dia, mes, anyo) == 1 || diaDeLaSemanaEntero(dia, mes, anyo) == 3)
+				salida << dia << " " << mes << endl;		}
+		else{
+			next_it = false;
+			salida << "0 0";
+		}
+	}while(next_it);
+
+	entrada.close();
+	salida.close();
+	
+	return true;
 }
