@@ -49,6 +49,7 @@ int solicitaAnyo(){
 
 }
 
+//Pide un mes al usuario
 int solicitaMes(){
 
 	int var;
@@ -68,6 +69,7 @@ int solicitaMes(){
 
 } 
 
+// Pide un dia de entrada al usuario
 int solicitaDia(int mes, int anyo){
 
 	int dia;
@@ -208,6 +210,7 @@ string nombreDia (int representacionDia){
 	return semana[representacionDia];
 }
 
+// Dado un numero enero devuelve una cadena con el texto de dicho mes
 string nombreMes(int mes){
 
 	string semana[] = {	"enero", 	
@@ -232,6 +235,7 @@ string diaDeLaSemana(int dia, int mes, int anyo){
 	return nombreDia (diaSemana (diasTranscurridos (dia, mes, anyo)));
 }
 
+// recibe un dia - mes - año y devuelve el valor entero de ese día de la semana (0 lunes, 1 martes,...)
 int diaDeLaSemanaEntero(int dia, int mes, int anyo){
 	return diaSemana (diasTranscurridos (dia, mes, anyo));
 }
@@ -247,7 +251,7 @@ int primerDomingoMes(int mes, int anyo){
 	return i;
 }
 
-//FUNCIONA
+//Cuenta el numero total de domingos de un mes - anio que recibe como parámetro de entrada
 int contadorDomingosMes(int mes, int anyo){
 
 	int total = 0;
@@ -262,7 +266,6 @@ int contadorDomingosMes(int mes, int anyo){
 	return total;
 }
 
-//FUNCIONA
 //	muestra por pantalla los domingos del año anyo y devuelve el número de domingos mostrados.
 int domingosAnyo(int anyo){
 
@@ -274,6 +277,9 @@ int domingosAnyo(int anyo){
 	return domingos;
 }
 
+
+// Dado un año calcula, extrayendo los datos del fichero FIESTAS cuales son los posibles puentes de ese anio y los 
+// escribe en el fichero de salida puentes
 bool puentes(int anyo){
 
 	ifstream entrada;
