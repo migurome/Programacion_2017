@@ -141,7 +141,7 @@ bool esPosibleGrua1Entre(const tArray fila, int tam, int posIni,int posSoltar){
 	return ( esPosValida(tam, posIni) && esPosValida(tam, posSoltar) && estaVacia(fila, posSoltar) );
 }
 
- PARECE QUE...///Si es posible, realiza el movimiento de la grúa entre las posiciones posIni y posSoltar. Devuelve si el movimiento se ha realizado.
+///Si es posible, realiza el movimiento de la grúa entre las posiciones posIni y posSoltar. Devuelve si el movimiento se ha realizado.
 bool grua1Elemento(tArray fila, int tam, int posIni, int posSoltar){
 
 	bool realizado = false;
@@ -314,22 +314,25 @@ void ejecutarGuardarFichero(const tArray fila, int tam){
 //el movimiento.
 void ejecutarGrua(tArray fila, int tam){
 
-	int posIni, posSoltar;
+	int posIni, posSoltar, posFin;
 
 	mostrarFila(fila, tam);
 
-	cout << "Introduce la posicion que quieres levantar" << endl;
+	cout << "Introduce la posicion inicial" << endl;
+	cin >> posIni;
+	cout << "Introduce la posicion final" << endl;
 	cin >> posIni;
 	cout << "Introduce la posicion en que quieres soltar" << endl;
 	cin >> posSoltar;
 	
-	if(!esPosibleGrua1Entre(fila, tam, posIni, posSoltar))
-		cout << "No es posible realizar la operacion" << endl;
-	else{
-		grua1Elemento(fila, tam, posIni, posSoltar);
-		mostrarFila(fila, tam);
+	if(grua(fila, tam, posIni, posFin, posSoltar)){
 		cout << "Operacion realizada con exito" << endl;
 	}
+	else
+		cout << "No se ha podido realizar la operacion" << endl;
+
+	mostrarFila(fila, tam);
+
 }
 
 //Pregunta al usuario desde qué posición empujará la excavadora. Entonces lo hace, o bien indica que no lo ha hecho (porque la 
@@ -348,7 +351,7 @@ void ejecutarExcavadora(tArray fila, int tam){
 			cout << "Operacion realizada con exito" << endl;
 	}
 	else
-		cout << "No es posible realiizar el desplazamiento" << endl;
+		cout << "No es posible realizar el desplazamiento" << endl;
 
 	mostrarFila(fila, tam);
 
@@ -384,18 +387,70 @@ void ejecutarOpc(int opc, tArray fila, int &tam){
 
 // NEW FUNCTIONS
 
-// MÉTODOS DE GRUA //////////////////////////////////////////////////////////
 //Devuelve si el segmento a levantar no tiene su extremo derecho antes que el izquierdo y si todas las posiciones involucradas son
-//válidas en la fila de tamaño tam. Fíjate en que, para comprobar lo segundo, te basta con comprobarlo para los cuatro extremos
+//válidas en la fila de tamaño tam. Fíjate en que, para comprobar lo segundo, basta con comprobarlo para los cuatro extremos
 //involucrados.
-bool sonPosicionesPosiblesGrua(int tam, int posIni, int posFin, int posSoltar);
+
+// NO SE HAN REALIZADO PRUEBAS DE MOMENTO
+bool sonPosicionesPosiblesGrua(int tam, int posIni, int posFin, int posSoltar){
+
+	bool condicion = true;
+
+	if(posIni > posFin || posIni < 0 || posFin > tam || (posFin - posIni) > (tam - posSoltar)){
+		condicion = false;
+		cout << "sonPosicionesPosiblesGrua" << endl;
+	}
+
+	return condicion;
+}
+
 //Devuelve si es posible realizar el movimiento de la grúa, es decir, si es posible dejar caer todos los materiales de la fila
 //desde posIni hasta posFin a partir de la posición posSoltar.
-bool esPosibleGrua(const tArray fila, int tam, int posIni, int posFin, int posSoltar);
+
+// NO SE HAN REALIZADO PRUEBAS DE MOMENTO
+bool esPosibleGrua(const tArray fila, int tam, int posIni, int posFin, int posSoltar){
+
+	bool condicion = true;
+	int tamanio;
+
+	if(sonPosicionesPosiblesGrua(tam,posIni,posFin,posSoltar)){
+		tamanio = posFin - posIni;
+
+		for(int i = posSoltar; i < (posSoltar + tamanio); i++)
+			if(fila[i] == PROD_NULO){
+				condicion = false;
+				cout << "esPosibleGrua" << endl;
+			}
+	}
+	else
+		condicion = false;
+
+	return condicion;
+}
+
 //Primero se comprueba si el movimiento es posible tal y como descubre la función anterior. Si es así, realiza el movimiento de la
 //grúa de la siguiente manera: se ponen en un array auxiliar los elementos a levantar, se ponen huecos en sus correspondientes 
 //posiciones de la fila, y después se sueltan los elementos del array auxiliar en la fila, a partir de la posición a soltar.
-bool grua(tArray fila, int tam, int posIni, int posFin, int posSoltar);
+bool grua(tArray fila, int tam, int posIni, int posFin, int posSoltar){
+
+	bool condicion = true;
+	tArray auxiliar;
+	int recorrido = posFin - posIni;
+
+	if(esPosibleGrua(fila, tam, posIni, posFin, posSoltar)){
+		for(int i = 0; i < recorrido; i++){
+			auxiliar[i] = fila[posIni + i];
+			fila[posIni + i] = PROD_NULO;
+			fila[posSoltar + i] = auxiliar[i];
+		}
+	}
+	else{
+		condicion = false;
+		cout << "grua" << endl;
+	}
+
+	return condicion;
+}
 
 
 // MÉTODOS DE EXCAVADORA ///////////////////////////////////////////////////
