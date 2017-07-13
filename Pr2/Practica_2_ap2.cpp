@@ -1,4 +1,10 @@
 
+/*
+Fallos: 
+
+Queda por revisar el caso en el que queremos desplazar, con la excavadora, elementos a la posicion 0 de array, en principio
+no se puede desplazar completamente elementos a la izquierda, pero si a la derecha.
+*/
 
 #include <locale.h>
 #include <iostream>
@@ -85,7 +91,7 @@ bool esPosValida(int tam, int pos){
 
 	bool var = false;
 
-	if(pos < tam)
+	if(pos < tam && pos >= 0)
 		var = true;
 
 	return var;
@@ -173,6 +179,8 @@ int posHuecoLibreDerecha(const tArray fila, int tam, int posIni){
  
 }
 
+//Devuelve la posición del primer hueco libre de la fila si, comenzando por posIni, vamos avanzando paso a paso hacia la izquierda. 
+//Si no hay ninguno, devolverá el valor tam.
 int posHuecoLibreIzquierda(const tArray fila, int tam, int posIni){
 
 	int i = posIni;
@@ -214,6 +222,12 @@ bool excavadora1Derecha(tArray fila, int tam, int posIni){
 	return retorno;
 }
 
+//Desplaza la pala de la excavadora desde posIni una posición hacia la izquierda, empujando desde su posición todos los elementos 
+//adyacentes (es decir, no separados por huecos) hacia la derecha, y así, eliminando el primer hueco libre que haya en tal dirección. 
+//Recuerda que los materiales empujados no atraviesan los muros del final de la fila. Devuelve un booleano indicando si el 
+//desplazamiento ha podido ser realizado. Se considera así si la posición inicial es correcta, aunque no realice ninguna modificación 
+//visible sobre la fila.
+
 bool excavadora1Izquierda(tArray fila, int tam, int posIni){
 
 	int i = posIni;
@@ -235,6 +249,7 @@ bool excavadora1Izquierda(tArray fila, int tam, int posIni){
 }
 
 //Métodos del menú://////////////////////////////////////////////////
+
 //Muestra el menú de opciones, solicita al usuario su respuesta, y devuelve la opción escogida cuando el usuario haya respondido 
 //una opción válida.
 int menu(){
@@ -321,7 +336,7 @@ void ejecutarGrua(tArray fila, int tam){
 	cout << "Introduce la posicion inicial" << endl;
 	cin >> posIni;
 	cout << "Introduce la posicion final" << endl;
-	cin >> posIni;
+	cin >> posFin;
 	cout << "Introduce la posicion en que quieres soltar" << endl;
 	cin >> posSoltar;
 	
@@ -339,17 +354,19 @@ void ejecutarGrua(tArray fila, int tam){
 //posición desde la que pidió empujar es inválida). Muestra cómo queda la fila tras el movimiento.
 void ejecutarExcavadora(tArray fila, int tam){
 
-	int posIni;
+	int posIni, numDespla, direccion;
 
 	mostrarFila(fila, tam);
 
 	cout << "Introduce la posicion inicial" << endl;
 	cin >> posIni;
+	cout << "Introduce el numero de desplazamientos" << endl;
+	cin >> numDespla;
+	cout << "Introduce la direccion, [0 - Izquierda | 1 - Derecha]" << endl;
+	cin >> direccion;
 	
-	if(posHuecoLibreDerecha(fila, tam, posIni) != tam){
-		if(excavadora1Derecha(fila, tam, posIni))
-			cout << "Operacion realizada con exito" << endl;
-	}
+	if(excavadora(fila, tam, posIni, numDespla, direccion))
+		cout << "Operacion realizada con exito" << endl;
 	else
 		cout << "No es posible realizar el desplazamiento" << endl;
 
@@ -391,36 +408,32 @@ void ejecutarOpc(int opc, tArray fila, int &tam){
 //válidas en la fila de tamaño tam. Fíjate en que, para comprobar lo segundo, basta con comprobarlo para los cuatro extremos
 //involucrados.
 
-// NO SE HAN REALIZADO PRUEBAS DE MOMENTO
 bool sonPosicionesPosiblesGrua(int tam, int posIni, int posFin, int posSoltar){
 
 	bool condicion = true;
-
-	if(posIni > posFin || posIni < 0 || posFin > tam || (posFin - posIni) > (tam - posSoltar)){
+	int tamanio = posFin - posIni;
+ 
+	if((posIni > posFin) || (posIni < 0) || (posFin >= tam) || ((tamanio + posSoltar) >=  tam))
 		condicion = false;
-		cout << "sonPosicionesPosiblesGrua" << endl;
-	}
-
+	
 	return condicion;
 }
 
 //Devuelve si es posible realizar el movimiento de la grúa, es decir, si es posible dejar caer todos los materiales de la fila
 //desde posIni hasta posFin a partir de la posición posSoltar.
 
-// NO SE HAN REALIZADO PRUEBAS DE MOMENTO
 bool esPosibleGrua(const tArray fila, int tam, int posIni, int posFin, int posSoltar){
 
 	bool condicion = true;
 	int tamanio;
 
-	if(sonPosicionesPosiblesGrua(tam,posIni,posFin,posSoltar)){
+	if(sonPosicionesPosiblesGrua(tam, posIni, posFin, posSoltar)){
+	
 		tamanio = posFin - posIni;
-
-		for(int i = posSoltar; i < (posSoltar + tamanio); i++)
-			if(fila[i] == PROD_NULO){
+	
+		for(int i = posSoltar; i <= (posSoltar + tamanio); i++)
+			if(fila[i] != PROD_NULO)
 				condicion = false;
-				cout << "esPosibleGrua" << endl;
-			}
 	}
 	else
 		condicion = false;
@@ -438,28 +451,56 @@ bool grua(tArray fila, int tam, int posIni, int posFin, int posSoltar){
 	int recorrido = posFin - posIni;
 
 	if(esPosibleGrua(fila, tam, posIni, posFin, posSoltar)){
-		for(int i = 0; i < recorrido; i++){
+		for(int i = 0; i <= recorrido; i++){
 			auxiliar[i] = fila[posIni + i];
 			fila[posIni + i] = PROD_NULO;
 			fila[posSoltar + i] = auxiliar[i];
 		}
 	}
-	else{
+	else
 		condicion = false;
-		cout << "grua" << endl;
-	}
 
 	return condicion;
 }
 
 
 // MÉTODOS DE EXCAVADORA ///////////////////////////////////////////////////
+
 //Primero se comprueba si el movimiento es posible, es decir, si la posición desde la que empezar a empujar es válida. Si es así, se
 //lleva a cabo el movimiento de la excavadora: la excavadora se sitúa en la posición posIni y se mueve numDespla posiciones hacia la 
 //dirección empujando los materiales que encuentre a su camino. La implementación se hará en pasadas sucesivas de 1 desplazamiento de
-//toda la hilera de materiales empujados en cada una, ocupando un nuevo hueco en cada uno. Fíjate en que la hilera empujada podría hacerse cada
-//vez más grande a lo largo de las pasadas. Si en algún desplazamiento se empujan materiales contra el muro inicial o final, el 
-//resto de desplazamientos hasta llegar a numDespla no tienen efecto (ej. si en el primer ejemplo de la página 1 empujásemos desde 
+//toda la hilera de materiales empujados en cada una, ocupando un nuevo hueco en cada uno. Fíjate en que la hilera empujada podría 
+//hacerse cada vez más grande a lo largo de las pasadas. Si en algún desplazamiento se empujan materiales contra el muro inicial o final, 
+//el resto de desplazamientos hasta llegar a numDespla no tienen efecto (ej. si en el primer ejemplo de la página 1 empujásemos desde 
 //la posición 14 hacia la derecha 30 posiciones, el resultado sería igual que si lo hiciéramos sólo tres: 4, 6 y 8 quedarían en las 
 //posiciones 17, 18 y 19).
-bool excavadora(tArray fila, int tam, int posIni, int numDespla, int direccion);
+bool excavadora(tArray fila, int tam, int posIni, int numDespla, int direccion){
+
+	// int direccion
+		// 0 Izquierda
+		// 1 Derecha
+
+	bool retorno = true;
+
+	if(direccion == 1){ // Excavadora a la derecha
+		for(int i = 0 ; i < numDespla; i++)
+			if (posHuecoLibreDerecha(fila, tam, posIni + i))
+				excavadora1Derecha(fila, tam, posIni + i);
+			else
+				retorno = false;
+
+	}
+	else{
+		for(int i = posIni; i > (posIni - numDespla); i--)
+			if (posHuecoLibreIzquierda(fila, tam, i))
+				excavadora1Izquierda(fila, tam, i);
+			else
+				retorno = false;
+	}
+/*
+int posHuecoLibreIzquierda(const tArray fila, int tam, int posIni);
+bool excavadora1Izquierda(tArray fila, int tam, int posIni);
+void ejecutarExcavadora(tArray fila, int tam);
+*/
+
+}
