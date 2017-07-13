@@ -1,5 +1,9 @@
 
 /*
+
+Nota, esta versión ya incluye los apartados de eficiencia incluidos en el apartado 3 de la práctica, con lo que podemos dar por 
+concluido esa modificación
+
 Fallos: 
 
 Queda por revisar el caso en el que queremos desplazar, con la excavadora, elementos a la posicion 0 de array, en principio
