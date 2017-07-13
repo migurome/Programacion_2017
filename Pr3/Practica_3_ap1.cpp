@@ -139,7 +139,9 @@ no se puede desplazar completamente elementos a la izquierda, pero si a la derec
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 using namespace std;
+
 
 const int MAX = 50;
 
@@ -189,15 +191,18 @@ struct tJuego{
 void inicializa(tJuego &juego);
 bool cargarJuego(tJuego & juego);
 bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
-void iniciaCasilla(tJuego &juego, string linea, int tamlinea, int columna);
-void mostarTablero(tJuego &juego, int nfilas, int ncolumnas);
+void iniciaCasilla(tSokoban &sokoban, string linea, int tamlinea, int columna);
+void mostarValoresTablero(const tTablero tablero, int nfilas, int ncolumnas);
+void mostarFigurasTablero(const tTablero tablero, int nfilas, int ncolumnas);
+bool esNivelCorrecto(string cadena, int nivel);
 
 int main(){
 
 	tJuego game;
-	inicializa(game);
-	cargarJuego(game);
 
+	inicializa(game);
+	if(!cargarJuego(game))
+		cout << "Error al cargar el juego" << endl;
 
  	return 0;
 }
@@ -216,77 +221,131 @@ void inicializa(tJuego &juego){
 //Solicita al usuario el fichero y el nivel que desea jugar y lo carga desde dicho fichero.
 bool cargarJuego(tJuego & juego){
 
-	string nombre_fichero, line;
+	string nombre_fichero;
 	ifstream fich_in;
-	int i = 0, tam_columna = 0, tam_fila = 0,columna = 0;
+	int nivel;
 	bool retorno = false;
-	bool end_of_file = true;
 
 	cout << "Introduce el nombre del fichero a cargar" << endl;
 	cin >> nombre_fichero;
-
 	fich_in.open(nombre_fichero.c_str() , ios::in);
 	
-	//Apertura del fichero correcta
 	if(fich_in.is_open()){
-		//Obtenemos el nombre del Lvl y lo almacenamos
-		getline (fich_in, juego.level);
-		//Obtenemos el nombre del fichero y lo almacenamos
-		juego.name_file = nombre_fichero;
-
-		do{
-			getline(fich_in,line);
-      		iniciaCasilla(juego, line, line.length(), columna);
-      		columna++;
-		}
-		while(!fich_in.eof());
-   
-		tam_fila = line.length();
-		tam_columna = columna;
-
-	   	fich_in.close();
-	}
-	else
+		cout << "Introduce el nivel que quieres jugar" << endl;
+		cin >> nivel;
+		retorno = cargarNivel(fich_in, juego.sokoban, nivel);
+		fich_in.close();
+	}else
 		cout << "El fichero no existe" << endl;
-		
-		//mostarTablero(juego, tam_fila, tam_columna);
-
 
 	return retorno;
 
 }
+
 //Busca en el fichero el nivel solicitado y carga el tablero correspondiente. Devuelve un booleano indicando si lo ha encontrado.
-bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
+bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel){
+
+	string linea_fichero;
+	ifstream fich_in;
+	int i = 0, n_filas = 0, n_colms = 0;
+	bool retorno = true, end_of_file = false;
+	
+	// Encontramos si el nivel que queremos cargar está en esa línea
+	do{
+		if(getline(fichero, linea_fichero).eof()){ //No hemos llegado al final del fichero
+			end_of_file = true;
+			retorno = false;
+		}
+	}
+	while(!esNivelCorrecto(linea_fichero, nivel) && !end_of_file); 
+
+	if(retorno){ // Ha encontrado la linea correcta, podemos continuar, de lo contrario devolvemos un false
+		
+		do{
+			
+			getline(fichero, linea_fichero);
+			
+			//Únicamente necesitamos averiguar el tamanio de las filas una vez
+			if(n_filas == 0)
+				n_filas = linea_fichero.length();
+
+	  		iniciaCasilla(sokoban, linea_fichero, linea_fichero.length(), n_colms);
+	  		n_colms++;
+		}
+		while(linea_fichero.compare("") != 0);
 
 
-void iniciaCasilla(tJuego &juego, string linea, int tamlinea, int columna){
+		//Inicializacion de parámetros del tablero
+
+		sokoban.nfilas = n_filas;
+		sokoban.ncolumnas = n_colms;
+
+		mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
+	}
+
+	return retorno;
+}
+
+
+void iniciaCasilla(tSokoban &sokoban, string linea, int tamlinea, int columna){
 
 	//string caracter;
 
 	for(int i = 0; i < tamlinea; i++){
 				
 		if ((linea.compare(i,1,"#") == 0))
-			juego.sokoban.tablero[columna][i] = Muro;
+			sokoban.tablero[columna][i] = Muro;
 		else if ((linea.compare(i,1,"$") == 0))
-			juego.sokoban.tablero[columna][i] = Caja;
+			sokoban.tablero[columna][i] = Caja;
 		else if ((linea.compare(i,1,".") == 0))
-			juego.sokoban.tablero[columna][i] = DestinoC;
+			sokoban.tablero[columna][i] = DestinoL;
 		else if ((linea.compare(i,1,"@") == 0))
-			juego.sokoban.tablero[columna][i] = Jugador;
+			sokoban.tablero[columna][i] = Jugador;
 	}
 
 }
-/*
-void mostarTablero(tJuego &juego, int nfilas, int ncolumnas){
-		
-		cout << nfilas;
-		cout << ncolumnas;
 
+void mostarValoresTablero(const tTablero tablero, int nfilas, int ncolumnas){
+		
 		for(int i = 0; i < ncolumnas; i++){
-			for(int j = 0; i < nfilas; j++)
-				cout << juego.sokoban.tablero[i][j];
+			for(int j = 0; j < nfilas; j++)
+				cout << tablero[i][j];
+			cout << endl;
+		}	
+}
+
+void mostarFigurasTablero(const tTablero tablero, int nfilas, int ncolumnas){
+		
+		for(int i = 0; i < ncolumnas; i++){
+			for(int j = 0; j < nfilas; j++)
+				if(tablero[i][j] == 0)			// Libre
+					cout << " ";
+				else if (tablero[i][j] == 1)	// Muro
+					cout << "#";
+				else if (tablero[i][j] == 2)	// DestinoL
+					cout << ".";
+				else if (tablero[i][j] == 3)	// DestinoC
+					cout << "*";
+				else if (tablero[i][j] == 4)	// DestinoJ
+					cout << "$";
+				else if (tablero[i][j] == 5)	// Jugador
+					cout << "@";
+				else if (tablero[i][j] == 6)	// Caja
+					cout << "$";
 			cout << endl;
 		}
-		
 }
-*/
+
+bool esNivelCorrecto(string cadena, int nivel){
+
+	bool ret = false;
+	string busca = static_cast<ostringstream*>( &(ostringstream() << nivel) )->str();
+
+	if(cadena.find(busca) != -1)
+		ret = true;
+
+	return ret;
+}
+
+
+//mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
