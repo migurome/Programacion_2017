@@ -11,8 +11,7 @@ muestra un posible nivel del juego (imagen tomada de http://sokoban.info/):
 El jugador puede moverse en horizontal o en vertical (sin atravesar los muros, ni las
 cajas). Puede empujar las cajas a una casilla contigua libre (las cajas no pueden
 apilarse, ni desplazar más de una simultáneamente). El puzle está terminado cuando
-Práctica 3
-Página 1Fundamentos de la programación 2016/2017
+
 todas las cajas están en las posiciones destino (marcadas con punto rojo en la imagen
 anterior).
 El tablero anterior, que se ha cargado desde el fichero levels.txt y tiene nivel 0, lo
@@ -24,16 +23,17 @@ consola. Inicialmente mostrará un menú con dos opciones:
 0. Salir
 La opción 1 permitirá cargar un tablero de un determinado nivel desde el fichero que
 indique el usuario. Se podrán jugar partidas hasta que se elija la opción 0.
+
 1. Datos del programa
 El tipo enumerado tCasilla nos permite representar las casillas del tablero:
 typedef enum tCasilla{Libre,Muro,DestinoL,DestinoC,DestinoJ,Jugador,Caja}
 donde DestinoL, DestinoC y DestinoJ representan posiciones destino que están
 libres, con caja o con jugador respectivamente.
+
 Para mantener el estado del tablero el programa usa un array bidimensional de
 tCasilla . Declara la correspondiente constante MAX=50 y el tipo tTablero para
 representarlo.
-Práctica 3
-Página 2Fundamentos de la programación 2016/2017
+
 Define el tipo estructurado tSokoban para describir el estado del tablero, conteniendo:
 ✓ El tablero de tipo tTablero .
 ✓ El número de filas nfilas y de columnas ncolumnas del array bidimensional que
@@ -42,68 +42,23 @@ está ocupando el tablero (ambas <= MAX ).
 ✓ El número de cajas del tablero.
 ✓ El número de cajas ya colocadas en casilla destino.
 Define también el tipo estructurado tJuego que describe el estado del juego:
-✓
-✓
-✓
-✓
+
 El estado del tablero sokoban de tipo tSokoban .
 El número de movimientos realizados hasta el momento numMovimientos .
 El nombre del fichero nFichero del que se ha cargado el juego.
 El nivel que estamos jugando.
 El programa usa también un tipo enumerado tTecla con los siguientes valores:
 Arriba , Abajo , Derecha , Izquierda , Salir y Nada .
-2. Visualización del tablero
-Cada vez que vayas a visualizar el estado del tablero borra primero el contenido de la
-ventana de consola, de forma que siempre se muestre el tablero en la misma posición y
-la sensación sea más visual. Para borrar la consola utiliza:
-system("cls");
-Por defecto, el color de primer plano, aquel con el que se muestran los trazos de los
-caracteres, es blanco, mientras que el color de fondo es negro. Podemos cambiar esos
-colores, por supuesto, aunque debemos hacerlo utilizando rutinas que son específicas
-de Visual Studio, por lo que debemos ser conscientes de que el programa no será
-portable a otros compiladores.
-Disponemos de 16 colores diferentes entre los que elegir, con valores de 0 a 15, tanto
-para el primer plano como para el fondo. El 0 es el negro y el 15 es el blanco. Los
-demás son azul, verde, cian, rojo, magenta, amarillo y gris, en dos versiones, oscuro y
-claro.
-Visual Studio incluye una biblioteca, Windows.h , que tiene, entre otras, rutinas para la
-consola. Una de ellas es SetConsoleTextAttribute() , que permite ajustar los colores
-de fondo y primer plano. Incluye en el programa esa biblioteca y esta rutina:
-void colorFondo(int color) {
-HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-SetConsoleTextAttribute(handle, 15 | (color << 4));
-}
-Práctica 3
-Página 3Fundamentos de la programación 2016/2017
-Basta proporcionar un color para el fondo (1 a 14) y esa rutina lo establecerá, con el
-color de primer plano en blanco (15). Debes cambiar el color de fondo cada vez que
-tengas que dibujar una casilla y volverlo a poner a negro (0) a continuación.
-Al menos debes implementar estos subprogramas:
-✓ void dibujaCasilla(tCasilla casilla) : muestra una casilla del tablero.
-✓ void dibujar(const tJuego &juego) : muestra el tablero del juego, el nombre
-del fichero desde que se ha cargado, su nivel y el número de movimientos
-realizados.
+
+
 2. Carga de un nivel del juego
 Los tableros de juego de los distintos niveles se leerán de un archivo de texto que
 puede guardar tantos niveles diferentes como queramos.
 Por ejemplo, si el tablero del ejemplo anterior corresponde al nivel 0, en el archivo
 tendremos:
 Level 0
-###################
-#####
-###########
-#####$ ###########
-##### $###########
-### $ $ ##########
-### # ## ##########
-#
-# ## ##### ..#
-# $ $
-..#
-##### ### #@## ..#
-#####
-#########
-###################
+MIAU
+
 La primera línea define el número del nivel. A continuación aparece una matriz de
 caracteres, donde ’#’ representa muro, ’ ’ (blanco) es casilla vacía, ’.’ es casilla destino
 libre, ’$’ es caja y @ representa el jugador. Aunque no aparece en este ejemplo, en
@@ -111,18 +66,22 @@ otros niveles el carácter ’*’ representa caja en casilla destino y ‘+’ 
 en casilla destino. En este archivo los niveles vendrán separados por una línea vacía.
 En el Campus Virtual se proporcionarán varios archivos con un repertorio de niveles,
 la mayoría descargados de http://sneezingtiger.com/sokoban/levels.html.
+
 Observa que la matriz de caracteres no es cuadrada, y que los campos nfilas y
 ncolumnas quedan determinados por la lectura.
 Implementa al menos los siguientes subprogramas:
-✓ void inicializa(tJuego &juego) : inicializa el tablero , haciendo que todas las
+
+void inicializa(tJuego &juego) : inicializa el tablero , haciendo que todas las
 MAX x MAX casillas estén libres y el número de movimientos a 0.
-Práctica 3
-Página 4Fundamentos de la programación 2016/2017
-✓ bool cargarJuego(tJuego & juego) : solicita al usuario el fichero y el nivel
+
+bool cargarJuego(tJuego & juego) : solicita al usuario el fichero y el nivel
 que desea jugar y lo carga desde dicho fichero .
-✓ bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel) :
+bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel) :
 busca en el fichero el nivel solicitado y carga el tablero correspondiente.
 Devuelve un booleano indicando si lo ha encontrado.
+
+
+
 3. El juego en acción
 3.1 Lectura de teclas especiales
 Para leer las teclas pulsadas por el usuario implementa el siguiente subprograma:
@@ -155,10 +114,179 @@ especial:
 3.2 Movimiento del tablero
 Una vez que el usuario indica la dirección, tenemos que realizar el movimiento del
 jugador sobre el tablero. Para esto, implementa el siguiente subprograma:
-Práctica 3
-Página 5Fundamentos de la programación 2016/2017
+
+
 ✓ void hacerMovimiento(tJuego &juego, tTecla tecla) : realiza el movimiento
 del jugador en la dirección indicada. Si no se puede realizar el movimiento, no
 tiene efecto y no se incrementa tampoco el número de movimientos registrados.
 Ya tienes todo lo que necesitas para implementar en main() la dinámica del juego.
+*/
+
+
+
+/*
+
+Nota, esta versión ya incluye los apartados de eficiencia incluidos en el apartado 3 de la práctica, con lo que podemos dar por 
+concluido esa modificación
+
+Fallos: 
+
+Queda por revisar el caso en el que queremos desplazar, con la excavadora, elementos a la posicion 0 de array, en principio
+no se puede desplazar completamente elementos a la izquierda, pero si a la derecha.
+*/
+
+#include <locale.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+const int MAX = 50;
+
+//El tipo enumerado tCasilla nos permite representar las casillas del tablero:
+//donde DestinoL, DestinoC y DestinoJ representan posiciones destino que están libres, con caja o con jugador respectivamente.
+enum tCasilla{
+	Libre = 0,
+	Muro = 1,
+	DestinoL = 2,
+	DestinoC = 3,
+	DestinoJ = 4,
+	Jugador = 5,
+	Caja = 6
+};
+
+//El programa usa también un tipo enumerado tTecla con los siguientes valores: Arriba , Abajo , Derecha , Izquierda , Salir y Nada.
+enum tTecla{
+	Arriba,
+	Abajo,
+	Derecha,
+	Izquierda,
+	Salir,
+	Nada
+};
+
+//Para mantener el estado del tablero el programa usa un array bidimensional de tCasilla. 
+//Declara la correspondiente constante MAX=50 y el tipo tTablero para representarlo.
+typedef tCasilla tTablero[MAX][MAX];
+
+struct tSokoban{
+	tTablero tablero; 
+	int nfilas;
+	int ncolumnas;
+	int po_fila_Jugador;
+	int pos_columna_Jugador;
+	int ncajas;
+	int ncajas_destino;
+};
+
+struct tJuego{
+	tSokoban sokoban; 
+	int num_movimientos;
+	string name_file;
+	string level;
+};
+
+void inicializa(tJuego &juego);
+bool cargarJuego(tJuego & juego);
+bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
+void iniciaCasilla(tJuego &juego, string linea, int tamlinea, int columna);
+void mostarTablero(tJuego &juego, int nfilas, int ncolumnas);
+
+int main(){
+
+	tJuego game;
+	inicializa(game);
+	cargarJuego(game);
+
+
+ 	return 0;
+}
+
+//Inicializa el tablero , haciendo que todas las MAX x MAX casillas estén libres y el número de movimientos a 0.
+void inicializa(tJuego &juego){
+
+	for(int i = 0; i < MAX; i++)
+		for(int j = 0; j < MAX; j++)
+			juego.sokoban.tablero[i][j] = Libre;
+
+	juego.num_movimientos = 0;
+
+}
+
+//Solicita al usuario el fichero y el nivel que desea jugar y lo carga desde dicho fichero.
+bool cargarJuego(tJuego & juego){
+
+	string nombre_fichero, line;
+	ifstream fich_in;
+	int i = 0, tam_columna = 0, tam_fila = 0,columna = 0;
+	bool retorno = false;
+	bool end_of_file = true;
+
+	cout << "Introduce el nombre del fichero a cargar" << endl;
+	cin >> nombre_fichero;
+
+	fich_in.open(nombre_fichero.c_str() , ios::in);
+	
+	//Apertura del fichero correcta
+	if(fich_in.is_open()){
+		//Obtenemos el nombre del Lvl y lo almacenamos
+		getline (fich_in, juego.level);
+		//Obtenemos el nombre del fichero y lo almacenamos
+		juego.name_file = nombre_fichero;
+
+		do{
+			getline(fich_in,line);
+      		iniciaCasilla(juego, line, line.length(), columna);
+      		columna++;
+		}
+		while(!fich_in.eof());
+   
+		tam_fila = line.length();
+		tam_columna = columna;
+
+	   	fich_in.close();
+	}
+	else
+		cout << "El fichero no existe" << endl;
+		
+		//mostarTablero(juego, tam_fila, tam_columna);
+
+
+	return retorno;
+
+}
+//Busca en el fichero el nivel solicitado y carga el tablero correspondiente. Devuelve un booleano indicando si lo ha encontrado.
+bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
+
+
+void iniciaCasilla(tJuego &juego, string linea, int tamlinea, int columna){
+
+	//string caracter;
+
+	for(int i = 0; i < tamlinea; i++){
+				
+		if ((linea.compare(i,1,"#") == 0))
+			juego.sokoban.tablero[columna][i] = Muro;
+		else if ((linea.compare(i,1,"$") == 0))
+			juego.sokoban.tablero[columna][i] = Caja;
+		else if ((linea.compare(i,1,".") == 0))
+			juego.sokoban.tablero[columna][i] = DestinoC;
+		else if ((linea.compare(i,1,"@") == 0))
+			juego.sokoban.tablero[columna][i] = Jugador;
+	}
+
+}
+/*
+void mostarTablero(tJuego &juego, int nfilas, int ncolumnas){
+		
+		cout << nfilas;
+		cout << ncolumnas;
+
+		for(int i = 0; i < ncolumnas; i++){
+			for(int j = 0; i < nfilas; j++)
+				cout << juego.sokoban.tablero[i][j];
+			cout << endl;
+		}
+		
+}
 */
