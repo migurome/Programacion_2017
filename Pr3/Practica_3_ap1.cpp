@@ -235,7 +235,12 @@ bool cargarJuego(tJuego & juego){
 		cin >> nivel;
 		retorno = cargarNivel(fich_in, juego.sokoban, nivel);
 		fich_in.close();
-	}else
+
+		// Asignacion de parámetros 
+		juego.name_file = nombre_fichero;
+		juego.level = nivel;
+	}
+	else
 		cout << "El fichero no existe" << endl;
 
 	return retorno;
