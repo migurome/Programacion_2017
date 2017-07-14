@@ -8,8 +8,6 @@
 #include <conio.h>
 
 using namespace std;
-
-
 const int MAX = 50;
 
 //El tipo enumerado tCasilla nos permite representar las casillas del tablero:
@@ -42,7 +40,7 @@ struct tSokoban {
 	tTablero tablero;
 	int nfilas;
 	int ncolumnas;
-	int po_fila_Jugador;
+	int pos_fila_Jugador;
 	int pos_columna_Jugador;
 	int ncajas;
 	int ncajas_destino;
@@ -58,33 +56,21 @@ struct tJuego {
 void inicializa(tJuego &juego);
 bool cargarJuego(tJuego & juego);
 bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
-void iniciaCasilla(tSokoban &sokoban, string linea, int tamlinea, int columna);
-void mostarValoresTablero(const tTablero tablero, int nfilas, int ncolumnas);
-void mostarFigurasTablero(const tTablero tablero, int nfilas, int ncolumnas);
-bool esNivelCorrecto(string cadena, int nivel);
 tTecla leerTecla();
+bool esNivelCorrecto(string cadena, int nivel);
 void hacerMovimiento(tJuego &juego, tTecla tecla);
-
+void dibujaCasilla(tCasilla casilla);
+void dibujar(const tJuego &juego);
+void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char caracter);
 int main() {
 
 	tJuego game;
-	tTecla aux;
+
 	inicializa(game);
 	if (!cargarJuego(game))
 		cout << "Error al cargar el juego" << endl;
 
-	while ((aux = leerTecla()) != Salir) {
-		if (aux == Arriba)
-			cout << "Arriba" << endl;
-		else if (aux == Abajo)
-			cout << "Abajo" << endl;
-		else if (aux == Izquierda)
-			cout << "Izquierda" << endl;
-		else if (aux == Derecha)
-			cout << "Derecha" << endl;
-		else if (aux == Nada)
-			cout << "Nada" << endl;
-	}
+	dibujar(game);
 
 	system("pause");
 
@@ -103,7 +89,7 @@ void inicializa(tJuego &juego) {
 }
 
 //Solicita al usuario el fichero y el nivel que desea jugar y lo carga desde dicho fichero.
-bool cargarJuego(tJuego & juego) {
+bool cargarJuego(tJuego &juego) {
 
 	string nombre_fichero;
 	ifstream fich_in;
@@ -133,94 +119,39 @@ bool cargarJuego(tJuego & juego) {
 
 //Busca en el fichero el nivel solicitado y carga el tablero correspondiente. Devuelve un booleano indicando si lo ha encontrado.
 bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel) {
-
+	
 	string linea_fichero;
-	ifstream fich_in;
-	int i = 0, n_filas = 0, n_colms = 0;
-	bool retorno = true, end_of_file = false;
+	bool end_of_file = true, nivel_encontrado = true, nivel_cargado = true;
 
 	// Encontramos si el nivel que queremos cargar está en esa línea
-	do {
+	do 
+	{
 		if (getline(fichero, linea_fichero).eof()) { //No hemos llegado al final del fichero
-			end_of_file = true;
-			retorno = false;
+			end_of_file = true; 
+			nivel_encontrado = false;
 		}
-	} while (!esNivelCorrecto(linea_fichero, nivel) && !end_of_file);
+	} 
+	while (!esNivelCorrecto(linea_fichero, nivel) && !end_of_file);
 
-	if (retorno) { // Ha encontrado la linea correcta, podemos continuar, de lo contrario devolvemos un false
+	// Una vez hemos encotrado el nivel hay que cargarlo correctamente 
+		
+		string fila_fichero;
+		int columna = 0;
+		if (nivel_encontrado) {
+			
+			do
+			{
+				getline(fichero, fila_fichero);
+				for (int i = 0; i < fila_fichero.length(); i++){ // Recorremos todos los elementos de la cadena
+					modificaCasillaTablero(sokoban, i, columna, fila_fichero.at(i));
+				}
+					columna++;
+			} while (fila_fichero.compare("") != 0);
 
-		do {
-
-			getline(fichero, linea_fichero);
-
-			//Únicamente necesitamos averiguar el tamanio de las filas una vez
-			if (n_filas == 0)
-				n_filas = linea_fichero.length();
-
-			iniciaCasilla(sokoban, linea_fichero, linea_fichero.length(), n_colms);
-			n_colms++;
-		} while (linea_fichero.compare("") != 0);
-
-
-		//Inicializacion de parámetros del tablero
-
-		sokoban.nfilas = n_filas;
-		sokoban.ncolumnas = n_colms;
-
-		mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
-	}
-
-	return retorno;
-}
+		}
 
 
-void iniciaCasilla(tSokoban &sokoban, string linea, int tamlinea, int columna) {
-
-	//string caracter;
-
-	for (int i = 0; i < tamlinea; i++) {
-
-		if ((linea.compare(i, 1, "#") == 0))
-			sokoban.tablero[columna][i] = Muro;
-		else if ((linea.compare(i, 1, "$") == 0))
-			sokoban.tablero[columna][i] = Caja;
-		else if ((linea.compare(i, 1, ".") == 0))
-			sokoban.tablero[columna][i] = DestinoL;
-		else if ((linea.compare(i, 1, "@") == 0))
-			sokoban.tablero[columna][i] = Jugador;
-	}
-
-}
-
-void mostarValoresTablero(const tTablero tablero, int nfilas, int ncolumnas) {
-
-	for (int i = 0; i < ncolumnas; i++) {
-		for (int j = 0; j < nfilas; j++)
-			cout << tablero[i][j];
-		cout << endl;
-	}
-}
-
-void mostarFigurasTablero(const tTablero tablero, int nfilas, int ncolumnas) {
-
-	for (int i = 0; i < ncolumnas; i++) {
-		for (int j = 0; j < nfilas; j++)
-			if (tablero[i][j] == 0)			// Libre
-				cout << " ";
-			else if (tablero[i][j] == 1)	// Muro
-				cout << "#";
-			else if (tablero[i][j] == 2)	// DestinoL
-				cout << ".";
-			else if (tablero[i][j] == 3)	// DestinoC
-				cout << "*";
-			else if (tablero[i][j] == 4)	// DestinoJ
-				cout << "$";
-			else if (tablero[i][j] == 5)	// Jugador
-				cout << "@";
-			else if (tablero[i][j] == 6)	// Caja
-				cout << "$";
-		cout << endl;
-	}
+	return nivel_encontrado && nivel_cargado;
 }
 
 bool esNivelCorrecto(string cadena, int nivel) {
@@ -265,7 +196,51 @@ tTecla leerTecla() {
 // Realiza el movimiento del jugador en la dirección indicada.Si no se puede realizar el movimiento, no tiene efecto y 
 //no se incrementa tampoco el número de movimientos registrados.
 
-void hacerMovimiento(tJuego &juego, tTecla tecla){
+void hacerMovimiento(tJuego &juego, tTecla tecla) {}
+
+// Muestra una casilla del tablero.
+void dibujaCasilla(tCasilla casilla) {
+
+	if (casilla == 0)		// Libre
+		cout << " ";
+	else if (casilla == 1)	// Muro
+		cout << "#";
+	else if (casilla == 2)	// DestinoL
+		cout << ".";
+	else if (casilla == 3)	// DestinoC
+		cout << "*";
+	else if (casilla == 4)	// DestinoJ
+		cout << "$";
+	else if (casilla == 5)	// Jugador
+		cout << "@";
+	else if (casilla == 6)	// Caja
+		cout << "$";
+
+}
+// Muestra el tablero del juego, el nombre del fichero desde que se ha cargado, su nivel y el número de movimientos realizados.
+void dibujar(const tJuego &juego) {
+	
+	for (int i = 0; i < juego.sokoban.ncolumnas; i++) {
+		for (int j = 0; j < juego.sokoban.nfilas; j++)
+		dibujaCasilla(juego.sokoban.tablero[i][j]);
+		cout << endl;
+	}
+		
 }
 
-//mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
+void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char caracter){
+
+	if (caracter == '#')
+		sokoban.tablero[columna][fila] = Muro;
+	else if(caracter == ' ')
+		sokoban.tablero[columna][fila] = Libre;
+	else if (caracter == '@')
+		sokoban.tablero[columna][fila] = Jugador;
+	else if (caracter == '$')
+		sokoban.tablero[columna][fila] = Caja;
+
+	if (caracter == '@') {
+		sokoban.pos_columna_Jugador = columna;
+		sokoban.pos_fila_Jugador = fila;
+	}
+}
