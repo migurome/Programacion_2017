@@ -53,24 +53,34 @@ struct tJuego {
 	string level;
 };
 
-void inicializa(tJuego &juego);
-bool cargarJuego(tJuego & juego);
-bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
-tTecla leerTecla();
+		void inicializa(tJuego &juego);
+		bool cargarJuego(tJuego & juego);
+		bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
+		tTecla leerTecla();
 bool esNivelCorrecto(string cadena, int nivel);
-void hacerMovimiento(tJuego &juego, tTecla tecla);
-void dibujaCasilla(tCasilla casilla);
-void dibujar(const tJuego &juego);
+		void hacerMovimiento(tJuego &juego, tTecla tecla);
+		void dibujaCasilla(tCasilla casilla);
+		void dibujar(const tJuego &juego);
+		bool esCaja(tSokoban &sokoban, char caracter);
+		bool esCajaDestino(tSokoban sokoban, char caracter);
+		bool cargarJuegoPruebas(tJuego &juego);
+
+
+
 void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char caracter);
+
 int main() {
 
 	tJuego game;
+	tTecla tecla;
 
 	inicializa(game);
-	if (!cargarJuego(game))
+	if (!cargarJuegoPruebas(game))
 		cout << "Error al cargar el juego" << endl;
 
 	dibujar(game);
+	while ((tecla = leerTecla()) != Salir)
+		hacerMovimiento(game, tecla);
 
 	system("pause");
 
@@ -117,11 +127,35 @@ bool cargarJuego(tJuego &juego) {
 
 }
 
+bool cargarJuegoPruebas(tJuego &juego) {
+
+	string nombre_fichero = "niveles.txt";
+	ifstream fich_in;
+	int nivel = 10;
+	bool retorno = false;
+
+	fich_in.open(nombre_fichero.c_str(), ios::in);
+
+	if (fich_in.is_open()) {
+		retorno = cargarNivel(fich_in, juego.sokoban, nivel);
+		fich_in.close();
+
+		// Asignacion de parámetros 
+		juego.name_file = nombre_fichero;
+		juego.level = nivel;
+	}
+	else
+		cout << "El fichero no existe" << endl;
+
+	return retorno;
+
+}
+
 //Busca en el fichero el nivel solicitado y carga el tablero correspondiente. Devuelve un booleano indicando si lo ha encontrado.
 bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel) {
 	
 	string linea_fichero;
-	bool end_of_file = true, nivel_encontrado = true, nivel_cargado = true;
+	bool end_of_file = false, nivel_encontrado = true, nivel_cargado = true;
 
 	// Encontramos si el nivel que queremos cargar está en esa línea
 	do 
@@ -136,20 +170,36 @@ bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel) {
 	// Una vez hemos encotrado el nivel hay que cargarlo correctamente 
 		
 		string fila_fichero;
-		int columna = 0;
+		int columna = 0, tam_fila = 0;
+		sokoban.ncajas = 0;
+		sokoban.ncajas_destino = 0;
+
 		if (nivel_encontrado) {
 			
 			do
 			{
 				getline(fichero, fila_fichero);
 				for (int i = 0; i < fila_fichero.length(); i++){ // Recorremos todos los elementos de la cadena
+					
 					modificaCasillaTablero(sokoban, i, columna, fila_fichero.at(i));
+					
+					if (tam_fila == 0)
+						tam_fila = fila_fichero.size();
+					
+					if (esCaja(sokoban, fila_fichero.at(i)))
+						sokoban.ncajas++;
+
+					if (esCajaDestino(sokoban, fila_fichero.at(i)))
+						sokoban.ncajas_destino++;
+
 				}
 					columna++;
 			} while (fila_fichero.compare("") != 0);
 
+			//inicializar parámetros fila / columna de juego
+			sokoban.ncolumnas = columna;
+			sokoban.nfilas = tam_fila;
 		}
-
 
 	return nivel_encontrado && nivel_cargado;
 }
@@ -196,23 +246,88 @@ tTecla leerTecla() {
 // Realiza el movimiento del jugador en la dirección indicada.Si no se puede realizar el movimiento, no tiene efecto y 
 //no se incrementa tampoco el número de movimientos registrados.
 
-void hacerMovimiento(tJuego &juego, tTecla tecla) {}
+void hacerMovimiento(tJuego &juego, tTecla tecla) {
+
+	tCasilla casilla_destino;
+	tCasilla casilla_destino_caja;
+
+	int fila_destino, columna_destino;
+
+	if (tecla == Arriba) {
+
+		casilla_destino = juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador - 1][juego.sokoban.pos_fila_Jugador];
+
+		if (casilla_destino == Libre) { // El jugador no tiene objetos delante
+
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Libre;
+			juego.sokoban.pos_columna_Jugador--;
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Jugador;
+			juego.num_movimientos++;
+		}
+	}
+	else if (tecla == Abajo) {
+
+		casilla_destino = juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador + 1][juego.sokoban.pos_fila_Jugador];
+
+		if (casilla_destino == Libre ) {
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Libre;
+			juego.sokoban.pos_columna_Jugador++;
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Jugador;
+			juego.num_movimientos++;
+		}
+	}
+	else if (tecla == Derecha) {
+
+		casilla_destino = juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador + 1];
+
+		if (casilla_destino == Libre) {
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Libre;
+			juego.sokoban.pos_fila_Jugador++;
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Jugador;
+			juego.num_movimientos++;
+		}
+	}
+	else if (tecla == Izquierda) {
+
+		casilla_destino = juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador - 1];
+
+		if (casilla_destino == Libre) {
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Libre;
+			juego.sokoban.pos_fila_Jugador--;
+			juego.sokoban.tablero[juego.sokoban.pos_columna_Jugador][juego.sokoban.pos_fila_Jugador] = Jugador;
+			juego.num_movimientos++;
+		}
+	}
+
+	dibujar(juego);
+}
+
+void avanzar() {
+
+
+}
 
 // Muestra una casilla del tablero.
 void dibujaCasilla(tCasilla casilla) {
 
 	if (casilla == 0)		// Libre
 		cout << " ";
+	
 	else if (casilla == 1)	// Muro
 		cout << "#";
+	
 	else if (casilla == 2)	// DestinoL
 		cout << ".";
+	
 	else if (casilla == 3)	// DestinoC
 		cout << "*";
+	
 	else if (casilla == 4)	// DestinoJ
-		cout << "$";
+		cout << "+";
+	
 	else if (casilla == 5)	// Jugador
 		cout << "@";
+	
 	else if (casilla == 6)	// Caja
 		cout << "$";
 
@@ -221,26 +336,60 @@ void dibujaCasilla(tCasilla casilla) {
 void dibujar(const tJuego &juego) {
 	
 	for (int i = 0; i < juego.sokoban.ncolumnas; i++) {
-		for (int j = 0; j < juego.sokoban.nfilas; j++)
+		for (int j = 0; j <= juego.sokoban.nfilas; j++)
 		dibujaCasilla(juego.sokoban.tablero[i][j]);
 		cout << endl;
-	}
-		
+	}	
+}
+
+bool esCaja(tSokoban &sokoban, char caracter) {
+
+	bool retorno = false;
+
+	if (caracter == '$')
+		retorno = true;
+
+	return retorno;
+}
+
+bool esCajaDestino(tSokoban sokoban, char caracter) {
+
+	bool retorno = false;
+
+	if (caracter == '*')
+		retorno = true;
+
+	return retorno;
 }
 
 void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char caracter){
 
 	if (caracter == '#')
 		sokoban.tablero[columna][fila] = Muro;
-	else if(caracter == ' ')
+
+	else if (caracter == ' ')
 		sokoban.tablero[columna][fila] = Libre;
+
 	else if (caracter == '@')
 		sokoban.tablero[columna][fila] = Jugador;
+
 	else if (caracter == '$')
 		sokoban.tablero[columna][fila] = Caja;
 
-	if (caracter == '@') {
+	else if (caracter == '.')
+		sokoban.tablero[columna][fila] = DestinoL;
+
+	else if (caracter == '*')
+		sokoban.tablero[columna][fila] = DestinoC;
+
+	else if (caracter == '+')
+		sokoban.tablero[columna][fila] = DestinoJ;
+
+
+	if (caracter == '@' || caracter == '+') {
 		sokoban.pos_columna_Jugador = columna;
 		sokoban.pos_fila_Jugador = fila;
 	}
 }
+
+//mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
