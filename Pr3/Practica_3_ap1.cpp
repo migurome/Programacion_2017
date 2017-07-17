@@ -9,6 +9,7 @@
 
 using namespace std;
 const int MAX = 50;
+const int MAXH = 10;
 
 //El tipo enumerado tCasilla nos permite representar las casillas del tablero:
 //donde DestinoL, DestinoC y DestinoJ representan posiciones destino que están libres, con caja o con jugador respectivamente.
@@ -29,7 +30,8 @@ enum tTecla {
 	Derecha,
 	Izquierda,
 	Salir,
-	Nada
+	Nada,
+	Deshacer
 };
 
 //Para mantener el estado del tablero el programa usa un array bidimensional de tCasilla. 
@@ -46,41 +48,51 @@ struct tSokoban {
 	int ncajas_destino;
 };
 
+typedef tSokoban tHistoria[MAXH];
+
 struct tJuego {
 	tSokoban sokoban;
 	int num_movimientos;
 	string name_file;
 	string level;
+	tHistoria historia;
+	int conth;
 };
 
-		void inicializa(tJuego &juego);
-		bool cargarJuego(tJuego & juego);
-		bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
-		tTecla leerTecla();
+void inicializa(tJuego &juego);
+bool cargarJuego(tJuego & juego);
+bool cargarNivel(ifstream &fichero, tSokoban &sokoban, int nivel);
+tTecla leerTecla();
 bool esNivelCorrecto(string cadena, int nivel);
-		void hacerMovimiento(tJuego &juego, tTecla tecla);
-		void dibujaCasilla(tCasilla casilla);
-		void dibujar(const tJuego &juego);
-		bool esCaja(tSokoban &sokoban, char caracter);
-		bool esCajaDestino(tSokoban sokoban, char caracter);
-		bool cargarJuegoPruebas(tJuego &juego);
-
-
-
+void hacerMovimiento(tJuego &juego, tTecla tecla);
+void dibujaCasilla(tCasilla casilla);
+void dibujar(const tJuego &juego);
+bool esCaja(tSokoban &sokoban, char caracter);
+bool esCajaDestino(tSokoban sokoban, char caracter);
+bool cargarJuegoPruebas(tJuego &juego);
+void guardaHistoria(tJuego &juego, tSokoban actual);
+bool deshacerMovimiento(tJuego &juego);
 void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char caracter);
 
 int main() {
 
 	tJuego game;
 	tTecla tecla;
-
+	
 	inicializa(game);
 	if (!cargarJuegoPruebas(game))
 		cout << "Error al cargar el juego" << endl;
 
 	dibujar(game);
-	while ((tecla = leerTecla()) != Salir)
-		hacerMovimiento(game, tecla);
+	while ((tecla = leerTecla()) != Salir) {
+		if (tecla != Deshacer)
+			hacerMovimiento(game, tecla);
+		else
+			deshacerMovimiento(game);
+
+		dibujar(game);
+
+	}
 
 	system("pause");
 
@@ -93,6 +105,8 @@ void inicializa(tJuego &juego) {
 	for (int i = 0; i < MAX; i++)
 		for (int j = 0; j < MAX; j++)
 			juego.sokoban.tablero[i][j] = Libre;
+
+	juego.conth = 0;
 
 	juego.num_movimientos = 0;
 
@@ -237,6 +251,8 @@ tTecla leerTecla() {
 		tecla = Derecha;
 	else if (tecla_entero == 75)
 		tecla = Izquierda;
+	else if (tecla_entero == 100 || tecla_entero == 68)
+		tecla = Deshacer;
 	else
 		tecla = Nada;
 
@@ -252,6 +268,8 @@ void hacerMovimiento(tJuego &juego, tTecla tecla) {
 	tCasilla casilla_destino_caja;
 
 	int fila_destino, columna_destino;
+
+	guardaHistoria(juego, juego.sokoban);
 
 	if (tecla == Arriba) {
 
@@ -298,12 +316,6 @@ void hacerMovimiento(tJuego &juego, tTecla tecla) {
 			juego.num_movimientos++;
 		}
 	}
-
-	dibujar(juego);
-}
-
-void avanzar() {
-
 
 }
 
@@ -392,4 +404,37 @@ void modificaCasillaTablero(tSokoban &sokoban, int fila, int columna, char carac
 	}
 }
 
-//mostarFigurasTablero(sokoban.tablero, sokoban.nfilas, sokoban.ncolumnas);
+void guardaHistoria(tJuego &juego, tSokoban actual) {
+
+	tSokoban aux;
+	
+	if(juego.conth < 9)
+		juego.conth++;
+
+	for (int i = juego.conth; i > 0; i--)
+		juego.historia[i] = juego.historia[i - 1];
+
+	juego.historia[0] = actual;
+
+}
+
+bool deshacerMovimiento(tJuego &juego) {
+
+	bool retorno = true;
+
+	tSokoban aux;
+	if (juego.conth > 0) {
+
+		juego.sokoban = juego.historia[0];
+		juego.conth--;
+
+		for (int i = 0; i < juego.conth; i++)
+			juego.historia[i] = juego.historia[i + 1];
+
+		juego.historia[juego.conth] = aux;
+	}
+	else
+		retorno = false;
+
+	return retorno;
+}
