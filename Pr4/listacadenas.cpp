@@ -2,16 +2,16 @@
 #include "checkML.h"
 
 /*Entrada: el array l.
- *Devuelve el tamaÒo de la lista.
- *Salida: una variable con el tamaÒo del array l.
+ *Devuelve el tama√±o de la lista.
+ *Salida: una variable con el tama√±o del array l.
  */
 
 int  getTamanno(const tListaCadenas& l) {
 	return l.tam;
 }
 
-/*Entrada: el array l y la variable pos con la posiciÛn de la cadena.
- *Devuelve una cadena en la posiciÛn pos.
+/*Entrada: el array l y la variable pos con la posici√≥n de la cadena.
+ *Devuelve una cadena en la posici√≥n pos.
  *Salida: la cadena del array l.
  */
 
@@ -34,9 +34,10 @@ void aumentaCapacidad(tListaCadenas & l) {
 	tList aux;
 	aux.regLista = new tRegistro [3 * l.cap / 2 + 1];
 	aux.cont = 0;
-	for (int i = 0; i<l.tam; i++) {
+
+	for (int i = 0; i<l.tam; i++)
 		aux.regLista[i] = *(l.lista[i]);
-	}
+	
 	l.lista[0] = aux.regLista;
 	l.cap = 3 * l.cap / 2 + 1;
 }
@@ -46,9 +47,9 @@ void aumentaCapacidad(tListaCadenas & l) {
  */
 
 void insertar(tListaCadenas& l, const string& s) {
-	if (l.cap == l.tam) {
+	if (l.cap == l.tam)
 		aumentaCapacidad(l);
-	}
+	
 	(*l.lista[l.tam]).cadena = s;
 	//l.lista[l.tam] -> cadena = s;
 	l.tam++;
@@ -57,10 +58,10 @@ void insertar(tListaCadenas& l, const string& s) {
 
 /*Entrada: el array l y la palabra s.
  * Busca en el array la palabra s.
- *Salida: devuelve true si la cadena est· en la lista, y false si no, en una variable booleana.
+ *Salida: devuelve true si la cadena est√° en la lista, y false si no, en una variable booleana.
  */
 
-bool  buscar(const tListaCadenas& l, const string& s) {
+bool buscar(const tListaCadenas& l, const string& s) {
 	bool encontrado = false;
 	int i = 0;
 
@@ -74,7 +75,7 @@ bool  buscar(const tListaCadenas& l, const string& s) {
 }
 
 /*Entrada: el array l y la posicion en la variable pos.
- *Elimina el elemento en la posiciÛn pos.
+ *Elimina el elemento en la posici√≥n pos.
  */
 
 void  eliminar(tListaCadenas& l, int pos) {
@@ -144,5 +145,3 @@ destino.lista[i] = fuente.lista[i];
 
 
 */
-
-
