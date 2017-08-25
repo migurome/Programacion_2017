@@ -5,19 +5,20 @@ using namespace std;
 void muestraEstado();
 
 int main(){
+
 	tIndicePalabras idx;
 	string nomfichero,clave;
 	tListaCadenas archivos,totales;
 	tMatriz L, mp;
 	tVector v,vProx;
 	bool ok;
-	cout << "Por favor Introduzca el nombre del fichero raiz a partir del que se creara el indice"<< endl;
+
+	cout << "Por favor Introduzca el nombre del fichero raiz a partir del que se creara el indice" << endl;
 	cin >> nomfichero;
-	cout << "\nCargando..." << endl;
+	cout << "Cargando..." << endl;
 	crearTabla(idx,nomfichero,totales,L);
-	cout << "\nTabla indice creada." << endl;
-	cout << endl;
-	cout << endl;
+	cout << "Tabla indice creada." << endl << endl << endl;
+
 	for (int i = 0; i < idx.cont; i++){
 		cout << idx.arrayClave[i].clave << ":" << "[";
 		for (int j = 0; j < idx.arrayClave[i].valor.tam; j++){
@@ -28,32 +29,34 @@ int main(){
 		}
 		cout << "]" << endl;
 	}
-	cout << endl;
-	cout << "Matriz L: " << endl;
+
+	cout << endl << "Matriz L: " << endl;
 	imprimir(L);
-	cout << "\nTotales: " << endl;
-	cout << "[";
+	cout << "\nTotales: " << endl << "[";
+
 	for (int i = 0; i < totales.tam;i++){
 		cout << totales.arrayCadena[i];
 		if (i + 1 < totales.tam){
 			cout << ", ";
 		}
 	}
-	cout <<"]" << endl;
-	cout << endl;
+	
+	cout <<"]" << endl << endl;
+
 	mp = desdeEnlacesAMatriz(L);
-	cout << "\nMatriz M : ";
-	cout << endl;
+	
+	cout << "\nMatriz M : " << endl;
 	imprimir(mp);
 	vProx = vectorPropio(mp);
-	cout << "\nVector v :   (";
+	
+	cout << "Vector v :   (";
 	imprimir(vProx);
-	cout << ")" << endl;
-	cout << endl;
-	cout << "\nQue palabra quieres buscar? (fin - para terminar) : " << endl;
+	cout << ")" << endl << endl;
+	cout << "Que palabra quieres buscar? (fin - para terminar) : " << endl;
 	cin >> clave;
+
 	while (clave != "fin") {
-		cout << "La lista de archivos donde aparece la palabra es: "<<endl;
+		cout << "La lista de archivos donde aparece la palabra es: " << endl;
 		archivos=buscar(idx,clave);//la tabla ya esta ordenada
 		v = valoresSubLista(archivos,totales,vProx);
 		if (archivos.tam!=0){
@@ -67,14 +70,16 @@ int main(){
 		}
 		else{
 			cout << endl;
-			cout << "\nLo sentimos....la palabra buscada no se encuentra en ningun fichero" << endl;
+			cout << "Lo sentimos....la palabra buscada no se encuentra en ningun fichero" << endl;
 			cout << endl;	
 		}
 
 		cout << "\nQue palabra quieres buscar? (fin - para terminar) : " << endl;
 		cin >> clave;
 	}
+
 	cout << "Gracias por usar el buscador." << endl;
+	
 	return 0;
 }
 
