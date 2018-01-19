@@ -1,3 +1,24 @@
+/***
+ *      _____ ____    ____   ___  _ _____             
+ *     |  ___|  _ \  |___ \ / _ \/ |___  |            
+ *     | |_  | |_) |   __) | | | | |  / /             
+ *     |  _| |  __/   / __/| |_| | | / /              
+ *     |_|__ |_|     |_____|\___/|_|/_/        ____   
+ *     |  _ \ _ __ __ _  ___| |_(_) ___ __ _  |___ \  
+ *     | |_) | '__/ _` |/ __| __| |/ __/ _` |   __) | 
+ *     |  __/| | | (_| | (__| |_| | (_| (_| |  / __/  
+ *     |_|   |_|  \__,_|\___|\__|_|\___\__,_| |_____| 
+ *     __   _____ _ __ ___(_) /_/  _ __   / |         
+ *     \ \ / / _ \ '__/ __| |/ _ \| '_ \  | |         
+ *      \ V /  __/ |  \__ \ | (_) | | | | | |         
+ *      _\_/_\___|_|  |___/_|\___/|_| |_|_|_|         
+ *     |  \/  (_) __ _ _   _  ___| | |  _ \           
+ *     | |\/| | |/ _` | | | |/ _ \ | | |_) |          
+ *     | |  | | | (_| | |_| |  __/ | |  _ < _         
+ *     |_|  |_|_|\__, |\__,_|\___|_| |_| \_(_)        
+ *               |___/                                
+ */
+
 #include <locale.h>
 #include <iostream>
 #include <string>
@@ -44,7 +65,18 @@ int main(){
  	return 0;
 }
 
-// METODOS DE MANEJO DE FILAS //
+/***
+ *      __  __                   _        
+ *     |  \/  | __ _ _ __   ___ (_) ___   
+ *     | |\/| |/ _` | '_ \ / _ \| |/ _ \  
+ *     | |  | | (_| | | | |  __/| | (_) | 
+ *     |_|  |_|\__,_|_|_|_|\___|/ |\___/  
+ *       __| | ___   / _(_) | |__/ ___    
+ *      / _` |/ _ \ | |_| | |/ _` / __|   
+ *     | (_| |  __/ |  _| | | (_| \__ \   
+ *      \__,_|\___| |_| |_|_|\__,_|___/   
+ *                                        
+ */
 
 //CORRECTO//Dada una fila, la muestra en pantalla siguiendo el formato del final de la segunda página.
 void mostrarFila(const tArray fila, int tam){
@@ -102,9 +134,23 @@ bool estaVacia(const tArray fila, int pos){
 
 }
 
-// METODOS DE MANEJO DE FICHEROS //
+/***
+ *      __  __                   _             _       
+ *     |  \/  | __ _ _ __   ___ (_) ___     __| | ___  
+ *     | |\/| |/ _` | '_ \ / _ \| |/ _ \   / _` |/ _ \ 
+ *     | |  | | (_| | | | |  __/| | (_) | | (_| |  __/ 
+ *     |_|_ |_|\__,_|_| |_|\___|/ |\___/   \__,_|\___| 
+ *      / _(_) ___| |__   ___ |__/ ___  ___            
+ *     | |_| |/ __| '_ \ / _ \ '__/ _ \/ __|           
+ *     |  _| | (__| | | |  __/ | | (_) \__ \           
+ *     |_| |_|\___|_| |_|\___|_|  \___/|___/           
+ *                                                     
+ */
 
-//CORRECTO//Dado el fichero de lectura abierto fich, carga su contenido en la fila.
+/**
+	Dado el fichero de lectura abierto fich, carga su contenido en la fila.
+*/
+
 void leerFilaFich(ifstream &fich, tArray fila, int &tam){
 
 	int i = 0, elem = 0;
@@ -122,7 +168,10 @@ void leerFilaFich(ifstream &fich, tArray fila, int &tam){
 
 }
 
-//CORRECTO//Dado el fichero de escritura abierto fich, guarda en dicho fichero el contenido de la fila.
+/**
+	Dado el fichero de escritura abierto fich, guarda en dicho fichero el contenido de la fila.
+*/
+
 void escribirFilaFich(ofstream &fich, const tArray fila, int tam){
 
 	if(fich.is_open()){
@@ -133,8 +182,20 @@ void escribirFilaFich(ofstream &fich, const tArray fila, int tam){
 	fich  << -1;
 }
 
-//Métodos de grúa://////////////////////////////////////////////////
-//Devuelve cierto si posIni y posSoltar son posiciones válidas de la fila y además es posible dejar caer el contenido de la fila
+/***
+ *      __  __   __ _            _            
+ *     |  \/  | /_/| |_ ___   __| | ___  ___  
+ *     | |\/| |/ _ \ __/ _ \ / _` |/ _ \/ __| 
+ *     | |  | |  __/ || (_) | (_| | (_) \__ \ 
+ *     |_|  |_|\___|\__\___/ \__,_|\___/|___/ 
+ *       __| | ___    __ _ _ __ _/_/_  __ _   
+ *      / _` |/ _ \  / _` | '__| | | |/ _` |  
+ *     | (_| |  __/ | (_| | |  | |_| | (_| |  
+ *      \__,_|\___|  \__, |_|   \__,_|\__,_|  
+ *                   |___/                    
+ */
+
+ //Devuelve cierto si posIni y posSoltar son posiciones válidas de la fila y además es posible dejar caer el contenido de la fila
 //CORRECTO//situado en posIni en su posición posSoltar.
 bool esPosibleGrua1Entre(const tArray fila, int tam, int posIni,int posSoltar){
 	return ( esPosValida(tam, posIni) && esPosValida(tam, posSoltar) && estaVacia(fila, posSoltar) );
@@ -154,9 +215,21 @@ bool grua1Elemento(tArray fila, int tam, int posIni, int posSoltar){
 	return realizado;
 }
 
-//Métodos de excavadora://////////////////////////////////////////////////
+/***
+ *      __  __   __ _            _                 _        
+ *     |  \/  | /_/| |_ ___   __| | ___  ___    __| | ___   
+ *     | |\/| |/ _ \ __/ _ \ / _` |/ _ \/ __|  / _` |/ _ \  
+ *     | |  | |  __/ || (_) | (_| | (_) \__ \ | (_| |  __/  
+ *     |_|  |_|\___|\__\___/ \__,_|\___/|___/  \__,_|\___|  
+ *       _____  _____ __ ___   ____ _  __| | ___  _ __ __ _ 
+ *      / _ \ \/ / __/ _` \ \ / / _` |/ _` |/ _ \| '__/ _` |
+ *     |  __/>  < (_| (_| |\ V / (_| | (_| | (_) | | | (_| |
+ *      \___/_/\_\___\__,_| \_/ \__,_|\__,_|\___/|_|  \__,_|
+ *                                                          
+ */
+
 //Devuelve la posición del primer hueco libre de la fila si, comenzando por posIni, vamos avanzando paso a paso hacia la derecha. 
-//CORRECTO//Si no hay ninguno, devolverá el valor tam.
+//Si no hay ninguno, devolverá el valor tam.
 int posHuecoLibreDerecha(const tArray fila, int tam, int posIni){
 
 	int i = posIni;
@@ -233,9 +306,18 @@ bool excavadora1Izquierda(tArray fila, int tam, int posIni){
 	return retorno;	
 }
 
-//Métodos del menú://////////////////////////////////////////////////
+/***
+ *      __  __              __  
+ *     |  \/  | ___ _ __  _/_/_ 
+ *     | |\/| |/ _ \ '_ \| | | |
+ *     | |  | |  __/ | | | |_| |
+ *     |_|  |_|\___|_| |_|\__,_|
+ *                              
+ */
+
 //Muestra el menú de opciones, solicita al usuario su respuesta, y devuelve la opción escogida cuando el usuario haya respondido 
 //una opción válida.
+
 int menu(){
 
 	bool continua = true;
@@ -307,6 +389,7 @@ void ejecutarGuardarFichero(const tArray fila, int tam){
 	}
 
 }
+
 //En esta versión, pregunta al usuario qué posición quiere levantar y en qué posición quiere dejarlo caer. Si es posible, 
 //realizará el movimiento. Si el movimiento no fue posible, informará al usuario de ello. Se mostrará cómo queda la fila tras
 //el movimiento.
@@ -350,6 +433,7 @@ void ejecutarExcavadora(tArray fila, int tam){
 	mostrarFila(fila, tam);
 
 }
+
 //Dada la opción escogida por el usuario en el menú, la ejecuta.
 void ejecutarOpc(int opc, tArray fila, int &tam){
 
